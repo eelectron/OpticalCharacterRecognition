@@ -14,9 +14,10 @@ import cv2
 import sys
 import math
 import numpy as np
+from scipy import ndimage
 
 TrainFolder = '/home/prashant/Downloads/OdiaCharacterRecognition/Data/oriya_numeral'
-
+DATASET = '/home/prashant/Downloads/OdiaCharacterRecognition/Data/dataset/'
 #We want to image of size 16 x 16
 HEIGHT = 32
 WIDTH = 32
@@ -34,19 +35,42 @@ def showImage(name, img):
         cv2.destroyWindow(name) #destroy only window with name 'name'
         sys.exit()
     cv2.destroyAllWindows()
+  
+
+def saveImage(img, folder):
+    '''
+    Save the given 'image' to the given folder with name as '1.jpg'
+    img: processed image
+    folder: where image will be stored
+    k: integer value of key pressed
+    '''
+    #skip saving if n is pressed
+    m = input('Enter a num or enter n to skip saving')
+    if m == 'n':
+        return
+    cv2.imwrite(folder + m + '.jpg', img)
+    
     
 
 def getBestShift(img):
+    '''
+    This function returns the value (shiftx, shifty) .
+    If each pixel is shifted by this amount then it will be
+    centered in 28x28 box.
+    '''
     cy,cx = ndimage.measurements.center_of_mass(img)
 
     rows,cols = img.shape
     shiftx = np.round(cols/2.0-cx).astype(int)
     shifty = np.round(rows/2.0-cy).astype(int)
 
-    return shiftx,shifty
+    return shiftx, shifty
 
 
 def shift(img,sx,sy):
+    '''
+    Shift the location of each pixel by (sx, sy)
+    '''
     rows,cols = img.shape
     M = np.float32([[1,0,sx],[0,1,sy]])
     shifted = cv2.warpAffine(img,M,(cols,rows))
@@ -105,8 +129,8 @@ def preprocess(img):
     return: standardized image of single letter
     '''
     #binary threshold
-    im = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
-    (thresh, gray) = cv2.threshold(im, 128, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    (thresh, gray) = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
                 
                 
     #make image dimension as approx 20 x 20 so that
@@ -125,10 +149,11 @@ def preprocess(img):
     colsPadding = (int(math.ceil((28-cols)/2.0)),int(math.floor((28-cols)/2.0)))
     rowsPadding = (int(math.ceil((28-rows)/2.0)),int(math.floor((28-rows)/2.0)))
     img = np.lib.pad(img,(rowsPadding,colsPadding),'constant')
-    print(img.shape)
-
     
-    #center alphabets inside 28 x 28
+    #center the letter in 28 x 28 box
+    sx, sy = getBestShift(img)
+    img = shift(img, sx, sy)
+    print(img.shape)
     
     return img
 
@@ -145,7 +170,8 @@ def generateDataset(folder):
             name = file.split('.')
             if name[-1] == 'jpg':
                 #read image file
-                img = preprocess(path)
+                img = cv2.imread(path)
+                img = preprocess(img)
                 showImage('img', img)
                 #save the image
                 X.append(img)

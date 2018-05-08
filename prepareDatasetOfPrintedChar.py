@@ -30,11 +30,13 @@ def extractChar(img):
     #draw box around each char
     for cnt in contours:
         x,y,w,h = cv2.boundingRect(cnt)
-        print(x,y,w,h)
+        ch = img[y:y+h, x:x+w]
+        procImg =  pt.preprocess(ch)
         cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 1)
         pt.showImage('img', img)
+        pt.saveImage(img, pt.DATASET)
         
         
-path = '/home/prashant/Downloads/OdiaCharacterRecognition/Data/images/AlphabetsAndNumerals.png'
+path = '/home/prashant/Downloads/OdiaCharacterRecognition/Data/images/alphaNumeric1.png'
 img = cv2.imread(path)
 extractChar(img)
