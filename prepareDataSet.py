@@ -36,6 +36,21 @@ def showImage(name, img):
     cv2.destroyAllWindows()
     
 
+def getBestShift(img):
+    cy,cx = ndimage.measurements.center_of_mass(img)
+
+    rows,cols = img.shape
+    shiftx = np.round(cols/2.0-cx).astype(int)
+    shifty = np.round(rows/2.0-cy).astype(int)
+
+    return shiftx,shifty
+
+
+def shift(img,sx,sy):
+    rows,cols = img.shape
+    M = np.float32([[1,0,sx],[0,1,sy]])
+    shifted = cv2.warpAffine(img,M,(cols,rows))
+    return shifted
 
 
 #saveCharImage(TrainFolder)
@@ -85,6 +100,10 @@ It's important that all images are of same dimension so that it can be
 feed to the Neural Network .
 '''
 def preprocess(img):
+    '''
+    img: color image of single letter
+    return: standardized image of single letter
+    '''
     #binary threshold
     im = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     (thresh, gray) = cv2.threshold(im, 128, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
@@ -114,12 +133,13 @@ def preprocess(img):
     return img
 
    
-def saveCharImage(folder):
-    dataset = []
+def generateDataset(folder):
+    X = []
+    Y = []
     for file in os.listdir(folder):
         path = os.path.join(folder,file)
         if os.path.isdir(path) == True:
-            saveCharImage(path)
+            generateDataset(path)
         else:
             #read only jpg file
             name = file.split('.')
@@ -128,8 +148,8 @@ def saveCharImage(folder):
                 img = preprocess(path)
                 showImage('img', img)
                 #save the image
-                dataset.append(img)
-            
+                X.append(img)
+                
         
 
-saveCharImage(TrainFolder)
+#generateDataset(TrainFolder)
