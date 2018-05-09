@@ -17,10 +17,10 @@ import numpy as np
 from scipy import ndimage
 
 TrainFolder = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/oriya_numeral'
-DATASET = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/dataset/'
+
 #We want to image of size 16 x 16
-HEIGHT = 32
-WIDTH = 32
+HEIGHT = 28
+WIDTH  = 28
 
 def showImage(name, img):
     '''
@@ -157,24 +157,7 @@ def preprocess(img):
     img = shift(img, sx, sy)   
     return img
 
-   
-def generateDataset(folder):
-    X = []
-    Y = []
-    for file in os.listdir(folder):
-        path = os.path.join(folder,file)
-        if os.path.isdir(path) == True:
-            generateDataset(path)
-        else:
-            #read only jpg file
-            name = file.split('.')
-            if name[-1] == 'jpg':
-                #read image file
-                img = cv2.imread(path)
-                img = preprocess(img)
-                showImage('img', img)
-                #save the image
-                X.append(img)
+
                 
         
 

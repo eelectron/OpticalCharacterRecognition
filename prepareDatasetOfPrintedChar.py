@@ -10,7 +10,7 @@ Created on Tue May  8 09:52:23 2018
 This program is used to create training dataset for
 printed Odia alphabets and Numerals.
 '''
-import prepareDataSet as pt
+import preprocess as pt
 import os
 import cv2
 import sys
