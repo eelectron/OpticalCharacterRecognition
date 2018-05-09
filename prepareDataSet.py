@@ -16,8 +16,8 @@ import math
 import numpy as np
 from scipy import ndimage
 
-TrainFolder = '/home/prashant/Downloads/OdiaCharacterRecognition/Data/oriya_numeral'
-DATASET = '/home/prashant/Downloads/OdiaCharacterRecognition/Data/dataset/'
+TrainFolder = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/oriya_numeral'
+DATASET = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/dataset/'
 #We want to image of size 16 x 16
 HEIGHT = 32
 WIDTH = 32
@@ -45,10 +45,9 @@ def saveImage(img, folder):
     k: integer value of key pressed
     '''
     #skip saving if n is pressed
-    m = input('Enter a num or enter n to skip saving')
-    if m == 'n':
-        return
-    cv2.imwrite(folder + m + '.jpg', img)
+    inp = input('Enter n if you do not want to save image')
+    if inp != 'n':
+        cv2.imwrite(folder + inp + '.jpg', img)
     
     
 
@@ -80,6 +79,9 @@ def shift(img,sx,sy):
 #saveCharImage(TrainFolder)
         
 def printFile(folder):
+    '''
+    Recursively print all file and folder of a given folder
+    '''
     for file in os.listdir(folder):
         print(file)
         path = os.path.join(folder,file)
@@ -137,7 +139,7 @@ def preprocess(img):
     # it can be made of size 28 x 28
     
     img = resizeImage(gray, w=20, h=20)
-    print(img.shape)
+
     #blur = cv2.GaussianBlur(resized, (3,3), 0)
     
     #kernel = np.ones((2,2),np.uint8)
@@ -152,9 +154,7 @@ def preprocess(img):
     
     #center the letter in 28 x 28 box
     sx, sy = getBestShift(img)
-    img = shift(img, sx, sy)
-    print(img.shape)
-    
+    img = shift(img, sx, sy)   
     return img
 
    
