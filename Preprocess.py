@@ -119,6 +119,39 @@ def resizeImage(im, w = None, h = None, scale=0.5):
     return resized
 
 
+def thinning(img):
+    '''
+    This function used in thinning of character.
+    img: A binary image where background is of black color and character
+    is of white color.
+    Thinning increases the gap between the adjacent characters and
+    helps in detecting the char contour easily.
+    It also helps in standardizing the thick and thin character to thin
+    characters.
+    '''
+    size = np.size(img)
+    skel = np.zeros(img.shape, np.uint8)
+    element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
+    done = False
+    #kernel = np.ones((3,3), np.uint8)
+    imgInvCp = img.copy()
+    while(not done):
+        eroded = cv2.erode(imgInvCp, element)
+        temp = cv2.dilate(eroded, element)
+        temp = cv2.subtract(imgInvCp, temp)
+        skel = cv2.bitwise_or(skel, temp)
+        imgInvCp = eroded.copy()
+ 
+    zeros = size - cv2.countNonZero(imgInvCp)
+    if zeros == size:
+        done = True
+
+    #remove white dots
+    #closing = cv2.morphologyEx(skel, cv2.MORPH_CLOSE, kernel)
+    
+    #slight fatten
+    #dilate = cv2.dilate(closing, element)
+    return skel
 
 
 '''

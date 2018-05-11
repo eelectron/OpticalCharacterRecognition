@@ -14,6 +14,7 @@ import os
 import cv2
 import numpy as np
 
+RAW = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/images/alphaNumeric1.png'
 
 def encode_labels(Y, num_labels):
     onehot = np.zeros((num_labels, Y.shape[0]))
@@ -49,7 +50,7 @@ def generateDataset(folder):
     
     return X, Y
                 
- 
+#generateDataset(RAW) 
 
 def standardize(X, Y):
     '''

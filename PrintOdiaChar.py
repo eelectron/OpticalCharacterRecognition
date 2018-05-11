@@ -8,5 +8,5 @@ Created on Mon Apr 23 00:27:14 2018
 
 #Print all hindi character
 for i in range(2816, 2935):
-    print(chr(i),end=' ')
+    print(str(-1*(2816-i)) +' : '+str(i)+' : '+chr(i), end='\n')
     

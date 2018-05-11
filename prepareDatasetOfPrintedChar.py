@@ -9,8 +9,10 @@ Created on Tue May  8 09:52:23 2018
 '''
 This program is used to create training dataset for
 printed Odia alphabets and Numerals.
+It extract single letter from image and save on disk for
+further processng.
 '''
-import preprocess as pt
+import Preprocess as pp
 import os
 import cv2
 import sys
@@ -23,6 +25,7 @@ def sideSum(box):
     Multiply y by 1000 so that box in y+1 level is farther than box at
     y level.
     '''
+    
     return box[0] + 10*box[1]
     
 def extractChar(img):
@@ -31,8 +34,14 @@ def extractChar(img):
     Char must have WHITE color on black background then only
     findContours() function WILL WORK !!!
     '''
+    
+    #convert to gray scale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    #binarize image
     _, bw = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY_INV)
+    
+    #perform thinning
     im2, contours, hierarchy = cv2.findContours(bw, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     #sort the contours so that box appears from top left to right bottom
@@ -49,9 +58,9 @@ def extractChar(img):
         procImg =  pt.preprocess(ch)
         cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 1)
         pt.showImage('img', img)
-        i = pt.saveImage(procImg, pt.DATASET)
+        #i = pt.saveImage(procImg, pt.DATASET)
         
         
 path = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/images/alphaNumeric1.png'
 img = cv2.imread(path)
-extractChar(img)
+#extractChar(img)
