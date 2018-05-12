@@ -37,18 +37,24 @@ def showImage(name, img):
     cv2.destroyAllWindows()
   
 
-def saveImage(img, folder):
+def saveImage(img, folder, cat, k):
     '''
     Save the given 'image' to the given folder with name as '1.jpg'
     img: processed image
     folder: where image will be stored
-    k: integer value of key pressed
-    '''
-    #skip saving if n is pressed
-    inp = input('Enter n if you do not want to save image')
-    if inp != 'n':
-        cv2.imwrite(folder + inp + '.jpg', img)
+    k: Denotes the k'th example of given class
     
+    '''
+    
+    #skip saving if n is pressed
+    inp = input('Enter n if you do not want to save image or enter image class:')
+    if inp != 'n':
+        cv2.imwrite(folder + inp + '.'+str(k)+'.jpg', img)
+    
+    
+    '''
+    cv2.imwrite(folder + str(cat) + '.'+str(k)+'.jpg', img)
+    '''
     
 
 def getBestShift(img):
@@ -128,30 +134,30 @@ def thinning(img):
     helps in detecting the char contour easily.
     It also helps in standardizing the thick and thin character to thin
     characters.
+    RETURN: skel, thinned or skelonized  image
     '''
     size = np.size(img)
     skel = np.zeros(img.shape, np.uint8)
     element = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
     done = False
-    #kernel = np.ones((3,3), np.uint8)
-    imgInvCp = img.copy()
+    imgInvCp = img[:]
     while(not done):
-        eroded = cv2.erode(imgInvCp, element)
-        temp = cv2.dilate(eroded, element)
-        temp = cv2.subtract(imgInvCp, temp)
-        skel = cv2.bitwise_or(skel, temp)
-        imgInvCp = eroded.copy()
- 
-    zeros = size - cv2.countNonZero(imgInvCp)
-    if zeros == size:
-        done = True
-
-    #remove white dots
-    #closing = cv2.morphologyEx(skel, cv2.MORPH_CLOSE, kernel)
+        eroded = cv2.erode(imgInvCp, element) 
+        dilate = cv2.dilate(eroded, element)
+        subtracted = cv2.subtract(imgInvCp, dilate)
+        skel = cv2.bitwise_or(skel, subtracted)
+        imgInvCp = eroded[:]
     
-    #slight fatten
-    #dilate = cv2.dilate(closing, element)
-    return skel
+        #Stop when every pixel is eroded
+        if cv2.countNonZero(imgInvCp) == 0:
+            done = True
+    
+    #close gaps in letters
+    #closing = cv2.morphologyEx(skel, cv2.MORPH_CLOSE, element)
+    
+    #slight fatten the letter
+    dilate = cv2.dilate(skel, element)
+    return dilate
 
 
 '''
@@ -164,14 +170,14 @@ def preprocess(img):
     return: standardized image of single letter
     '''
     #binary threshold
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    (thresh, gray) = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #(thresh, gray) = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
                 
                 
     #make image dimension as approx 20 x 20 so that
     # it can be made of size 28 x 28
     
-    img = resizeImage(gray, w=20, h=20)
+    img = resizeImage(img, w=20, h=20)
 
     #blur = cv2.GaussianBlur(resized, (3,3), 0)
     
@@ -187,7 +193,10 @@ def preprocess(img):
     
     #center the letter in 28 x 28 box
     sx, sy = getBestShift(img)
-    img = shift(img, sx, sy)   
+    img = shift(img, sx, sy)
+    
+    #thinning
+    img = thinning(img)
     return img
 
 

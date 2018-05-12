@@ -9,7 +9,8 @@ import NeuralNetForOdiaCharHelper as nnh
 import generateDataset as gd
 import matplotlib.pyplot as plt
 import numpy as np
-DATASET = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/dataset/'
+import pickle
+DATASET = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/training1/'
 ### CONSTANTS ###
 layers_dims = [784, 300, 62]
 
@@ -81,7 +82,50 @@ def L_layer_model(X, Y, layers_dims, learning_rate=0.0075, num_iterations=3000, 
 
 X_orig, Y_orig = gd.generateDataset(DATASET)
 train_x, train_y = gd.standardize(X_orig, Y_orig)
-
+'''
+#THESE OUR TRAINED PARAMETERS or WEIGHTS
 parameters = L_layer_model(train_x, train_y, layers_dims, num_iterations=2500, print_cost=True)
 
-print(nnh.predict(train_x, train_y, parameters))
+#save parameters for later use
+pickle_para = open("para.pickle", "wb")
+pickle.dump(parameters, pickle_para)
+pickle_para.close()
+'''
+#Read parameters from pickle
+pickle_in = open("para.pickle", "rb")
+parameters = pickle.load(pickle_in)
+
+print("Training set accuracy: ",nnh.predict(train_x, train_y, parameters))
+
+
+
+#Testing
+TESTING2 = '/home/prashant/Downloads/OdiaCharacterRecognition/Code/Data/testing2/'
+X_test_orig, Y_test_orig = gd.generateDataset(TESTING2)
+test_x, test_y = gd.standardize(X_test_orig, Y_test_orig)
+print("Testing set accuracy: ",nnh.predict(test_x, test_y, parameters))
+
+
+
+
+#print corresponding character
+characters = {0:2918, 1:2919, 2:2920 , 3:2921, 4:2922, 5:2923,
+              6:2924, 7:2925, 8:2926, 9:2927, 10:2821, 11:2878,
+              12:2823, 13:2824, 14:2825, 15:2826, 16:2827, 17:2912,
+              18:2831, 19:2832, 20:2835, 21:2836, 22:2837, 23:2838, 24:2839, 
+              25:2840,
+              26:2841, 27:2842, 28:2843, 29:2844, 30:2845,  31:2846,
+              32:2847, 33:2848, 34:2849,
+              35:2850, 36:2851, 37:2852, 38:2853, 39:2854, 40:2855,
+              41:2856, 42:2858, 43:2859,
+              44:2860, 45:2861, 46:2862, 47:2863, 48:2864,
+              49:2867, 50:2870, 51:2871, 52:2872, 
+              53:2873, 54:0, 55:2911, 56:2866, 57:2908, 58:2909, 59:2818,
+              61:2817, 60:2819}
+AL, caches = nnh.L_model_forward(test_x, parameters)
+for i in range(AL.shape[1]):
+    cls = np.argmax(AL[:,i])
+    act = np.argmax(test_y[:,i])
+    print('Actual: ',chr(characters[act]), 'Predicted: ',chr(characters[cls]))
+    
+    
